@@ -1,14 +1,36 @@
 const express = require('express');
 const router = express.Router();
-const { addStudent, getAllStudents } = require('../controllers/adminController');
+const User = require('../models/User');
 
-// 1. Route to add a new student
-router.post('/add-student', addStudent);
+// 1. GET ALL STUDENTS
+router.get('/students', async (req, res) => {
+  try {
+    const students = await User.find({ role: 'Student' }).sort({ createdAt: -1 });
+    res.json(students);
+  } catch (err) {
+    res.status(500).json({ success: false, message: "Error fetching students" });
+  }
+});
 
-// 2. Route to get all registered students for the table
-router.get('/students', getAllStudents);
+// 2. GET ALL TEACHERS
+router.get('/teachers', async (req, res) => {
+  try {
+    const teachers = await User.find({ role: 'Teacher' }).sort({ createdAt: -1 });
+    res.json(teachers);
+  } catch (err) {
+    res.status(500).json({ success: false, message: "Error fetching teachers" });
+  }
+});
 
-// 3. Test route
-router.get('/test', (req, res) => res.send("Admin route working"));
+// 3. DELETE USER (This is what was missing!)
+router.delete('/delete/:id', async (req, res) => {
+  try {
+    const id = req.params.id;
+    await User.findByIdAndDelete(id);
+    res.json({ success: true, message: "User deleted successfully" });
+  } catch (err) {
+    res.status(500).json({ success: false, message: "Error deleting user" });
+  }
+});
 
 module.exports = router;
